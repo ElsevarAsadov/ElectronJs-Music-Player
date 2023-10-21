@@ -26,6 +26,11 @@ body {
   box-sizing: border-box;
 }
 
+.app-shadow {
+  box-shadow: 4px 2px 3px 2px rgba(5, 5, 5, 0.26); /* Adds a shadow following the circle shape */
+}
+
+
 .DRAGABLE{
   -webkit-app-region: drag;
 

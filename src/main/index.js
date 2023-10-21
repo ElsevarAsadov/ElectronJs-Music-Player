@@ -3,39 +3,53 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+let mainWindow
+
+//prevent two app instances in same time
+const gotTheLock = app.requestSingleInstanceLock()
+if (gotTheLock) {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      app.exit()
+    }
+  })
+}
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 600,
-    height: 300,
+  mainWindow = new BrowserWindow({
+    width: 620,
+    height: 320,
     resizable: false,
     show: false,
     frame: false,
     transparent: true,
     autoHideMenuBar: true,
+
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       sandbox: false,
       contextIsolation: false,
-      nodeIntegration: true,
+      nodeIntegration: true
     }
   })
 
   //Ipc Events
 
-  ipcMain.handle("window.minimize", ()=>{
+  ipcMain.handle('window.minimize', () => {
     mainWindow.minimize()
   })
 
-  ipcMain.handle("window.destroy", ()=>{
+  ipcMain.handle('window.destroy', () => {
     mainWindow.destroy()
   })
-
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
 
-    mainWindow.webContents.send('file', 'heyy')
+    const args = process.argv
+    if (args.length > 1) {
+      mainWindow.webContents.send('file', args[1])
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -66,7 +80,10 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+
   createWindow()
+
+
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

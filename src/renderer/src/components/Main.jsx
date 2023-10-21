@@ -4,12 +4,25 @@ import audio from '../assets/Akon.mp3'
 import {IconButton} from "@mui/material";
 
 const { ipcRenderer } = require('electron')
-
+const path = require('path')
 function Main() {
 
 
+
+
   ipcRenderer.on('file', (e, filePath)=>{
-    console.log(filePath)
+    audioNode.current?.pause();
+
+    audioNode.current = new Audio(filePath);
+
+
+    audioNode.current.src = filePath
+
+    setAudioData(c=>({...c, path: filePath, name: path.basename(filePath)}))
+
+    audioNode.current.play()
+
+    setPaused(false)
   })
 
 
@@ -24,8 +37,6 @@ function Main() {
     const [audioData, setAudioData] = useState({
     name: '',
     path: '',
-    size: '',
-    type: '',
     duration: 0,
     currentTime: 0
   })
@@ -38,7 +49,7 @@ function Main() {
    *
    * @type {React.MutableRefObject<HTMLAudioElement>}
    */
-  const audioNode = useRef()
+  const audioNode = useRef(new Audio())
 
   useEffect(() => {
     if(paused){
@@ -50,21 +61,25 @@ function Main() {
 }, [paused])
 
   useEffect(() => {
-    const audioNodeEndE = audioNode.current?.addEventListener('ended', function(){
+    const audioNodeEndE = audioNode?.current?.addEventListener('ended', function(){
       setPaused(true)
       setAudioData(c=>({...c, currentTime: 0}))
       this.currentTime = 0;
     })
 
-    if (audioNode.current) {
-      const audioNodeE = audioNode.current?.addEventListener('loadedmetadata', function () {
+      const audioNodeMetaE = audioNode?.current?.addEventListener('loadedmetadata', function () {
         setAudioData((c) => ({ ...c, duration: this.duration }))
       })
-    }
 
-    return (audioNodeEndE, audioNodeE)=>{
 
-      removeEventListener('loadedmetadata', audioNodeE)
+    const audioNodeTimeE = audioNode?.current?.addEventListener('timeupdate', function () {
+      setAudioData((c) => ({ ...c, currentTime: this.currentTime }))
+    })
+
+    return (audioNodeEndE, audioNodeMetaE, audioNodeTimeE)=>{
+
+      removeEventListener('loadedmetadata', audioNodeTimeE)
+      removeEventListener('loadedmetadata', audioNodeMetaE)
       removeEventListener('ended', audioNodeEndE)
 
 
@@ -76,31 +91,28 @@ function Main() {
     const dropzoneDragE = dropzoneRef.current.addEventListener('dragover', (e) => {
       e.preventDefault()
     })
+
     const dropzoneDropE = dropzoneRef.current.addEventListener('drop', async ({ dataTransfer }) => {
-      const { name, path, size, type } = dataTransfer.files[0]
+      const { name, path} = dataTransfer.files[0]
 
       audioNode.current?.pause();
 
 
-      setAudioData((c) => ({ ...c, name, path, size, type }))
+      setAudioData((c) => ({ ...c, name, path }))
 
-      audioNode.current = new Audio(audio)
+      //audioNode.current.src = audio
 
-      //audioNode.current = new Audio(path)
+      audioNode.current.src = path
 
       await audioNode.current.play()
 
         setPaused(false)
 
-      const audioNodeE = audioNode.current.addEventListener('timeupdate', function () {
-        setAudioData((c) => ({ ...c, currentTime: this.currentTime }))
-      })
     })
 
     return (dropzoneDropE, dropzoneDragE, audioNodeE) => {
       removeEventListener('drop', dropzoneDropE)
       removeEventListener('dragover', dropzoneDragE)
-      removeEventListener('timeupdate', audioNodeE)
     }
   }, [])
 
@@ -137,7 +149,6 @@ function Main() {
               color: 'black'
             }}
             onChange={(_, value) => {
-              console.log('foo')
               setAudioData((c) => ({ ...c, currentTime: value }))
               audioNode.current.currentTime = value
             }}

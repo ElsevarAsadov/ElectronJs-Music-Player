@@ -12,7 +12,7 @@ function Frame() {
   return (
     <div
       className={
-        'DRAGABLE text-white w-full h-[30px] rounded-tr-[10px] rounded-tl-[10px] flex gap-3 items-center bg-black justify-between p-1 pr-3 pl-3'
+        'DRAGABLE text-white w-full h-[30px] flex gap-3 items-center bg-black justify-between p-1 pr-3 pl-3'
       }
     >
       <p className={'NODRAG text-[12px] whitespace-nowrap'}>Electro Player</p>

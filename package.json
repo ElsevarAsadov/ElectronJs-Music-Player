@@ -1,9 +1,9 @@
 {
-  "name": "electroplayer",
+  "name": "ElectronPlayer",
   "version": "1.0.0",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "github - ElsevarAsadov",
   "homepage": "https://www.electronjs.org",
   "scripts": {
     "format": "prettier --write .",
@@ -44,5 +44,53 @@
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
+  },
+
+
+  "build": {
+    "nsis": {
+      "runAfterFinish": false
+    },
+    "msi": {
+      "runAfterFinish": false
+    },
+    "productName": "Electron Music Player",
+    "appId": "elsevarasadov.com",
+    "mac": {
+      "category": "public.app-category.music",
+      "target": "dmg",
+      "icon": "build/icon.icns",
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3 File",
+          "role": "Editor",
+          "isPackage": false
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3",
+          "description": "MP3 Audio",
+          "role": "Editor"
+        }
+      ]
+    },
+    "linux": {
+      "target": "AppImage",
+      "fileAssociations": [
+        {
+          "ext": "mp3",
+          "name": "MP3 Audio",
+          "mimeType": "audio/mpeg",
+          "role": "Editor"
+        }
+      ]
+    }
   }
 }
